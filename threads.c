@@ -18,12 +18,12 @@
 #include <ucontext.h>
 
 #define NUMBER_OF_THREADS 10
-#define NUMBER_OF_TICKETS 100
+#define NUMBER_OF_TICKETS 1000
 
 static ucontext_t ctx[NUMBER_OF_THREADS];
 
 static int tickets[NUMBER_OF_TICKETS];
-static int threadCount[NUMBER_OF_THREADS] = {0};
+static int threadCount[NUMBER_OF_THREADS];
 
 static void test_thread(void);
 static int thread = 0;
@@ -63,6 +63,7 @@ int main(void) {
 	// Create 10 threads
 	int i;
 	for (i = 0; i < NUMBER_OF_THREADS; i++){
+                threadCount[i] = 0;
 		thread_create(&test_thread);
 		thread++;
 	}
