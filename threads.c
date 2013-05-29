@@ -5,7 +5,7 @@
  *
  * CMPS 111
  * Assignement 2 - Thread scheduler
- *
+ * Lottery schedualing with timers
 */
 
 #include <stdio.h>
@@ -34,27 +34,25 @@ void thread_exit(int);
 static struct sigaction sa; 
 static struct itimerval timer;
 
-// Yield to another thread
+/*Yield to another thread
+* yeild thread will schedule each thread, it will also 
+* stop a thread change and restart the other threads 
+* in essence it will swap threads.
+*/
 void thread_yield(int signum) {
     int old_thread = thread;
     
     //The scheduler picks a ticket from the array and swaps the threads
-	thread = tickets[ticketCount++];
-
-    //printf("Thread %d yielding to thread %d\n", old_thread, thread);
-    //printf("Thread %d calling swapcontext\n", old_thread);
-    
-    // This will stop us from running and restart the other thread
+    thread = tickets[ticketCount++];
     swapcontext(&ctx[old_thread], &ctx[thread]);
-
-    // The other thread yielded back to us
-    //printf("Thread %d back in thread_yield\n", thread);
 }
 
-// This is the main thread
-// In a real program, it should probably start
-// all of the threads and then wait for them to finish
-// without doing any "real" work
+/* The main fucntion will create 10 threads and assign ramdom tickets to 
+* each thread. the main will also install a timer handler to signal 
+* and dictate when the yeild fucntion will be called. thus it will also 
+* configure a timer to expire after 100 msec and every 100 ms within each other. this
+* will have the tickets be looped though each time
+*/ 
 int main(void) {
     printf("Main starting\n");
     
@@ -116,7 +114,11 @@ static void test_thread(void) {
     thread_exit(0);
 }
 
-// Create a thread
+/* Create a thread will create a thread but and along with that 
+* creat its context if it does not have any. this function will 
+* also setup the stack for each threa but also deal with the thread 
+* context when it exits
+*/
 int thread_create(int (*thread_function)(void)) {
     int newthread = 1+thread;
     
